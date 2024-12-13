@@ -87,7 +87,7 @@ const authSlice = createSlice({
          })
          .addCase(loginUserThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.logoutUserThunk = true
+            state.isAuthenticated = true
             state.user = action.payload
          })
          .addCase(loginUserThunk.rejected, (state, action) => {
@@ -102,7 +102,7 @@ const authSlice = createSlice({
          })
          .addCase(logoutUserThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.logoutUserThunk = false
+            state.isAuthenticated = false
             state.user = null // 로그아웃 후 유저 정보 초기화
          })
          .addCase(logoutUserThunk.rejected, (state, action) => {
