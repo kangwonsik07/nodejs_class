@@ -55,3 +55,74 @@ export const checkAuthStatus = async () => {
       throw error // request 할때 오류 발생시 에러를 registerUser()함수를 실행한 곳으로 던짐
    }
 }
+
+// 포스트 등록
+export const createPost = async (postData) => {
+   try {
+      // postData: 등록할 게시물 데이터가 담겨있는 json객체
+      // config는 이미지 파일 전송 때문에 필요
+      const config = {
+         headers: {
+            'Content-Type': 'multipart/form-data', // 데이터 형식 지정 , 파일 정송시 반드시 지정
+         },
+      }
+
+      const response = await snsApi.post('/post', postData, config)
+      return response
+   } catch (error) {
+      console.error(`API Request 오류: ${error.message}`)
+      throw error
+   }
+}
+
+// 포스트 수정
+export const updatePost = async (id, postData) => {
+   try {
+      // postData: 수정할 게시물 데이터가 담겨있는 json객체
+      // config는 이미지 파일 전송 때문에 필요
+      const config = {
+         headers: {
+            'Content-Type': 'multipart/form-data', // 데이터 형식 지정 , 파일 정송시 반드시 지정
+         },
+      }
+
+      const response = await snsApi.put(`/post/${id}`, postData, config)
+      return response
+   } catch (error) {
+      console.error(`API Request 오류: ${error.message}`)
+      throw error
+   }
+}
+
+// 포스트 삭제
+export const deletePost = async (id) => {
+   try {
+      const response = await snsApi.delete(`/post/${id}`)
+      return response
+   } catch (error) {
+      console.error(`API Request 오류: ${error.message}`)
+      throw error
+   }
+}
+
+// 특정 포스트 가져오기
+export const getPostById = async (id) => {
+   try {
+      const response = await snsApi.get(`/post/${id}`)
+      return response
+   } catch (error) {
+      console.error(`API Request 오류: ${error.message}`)
+      throw error
+   }
+}
+
+// 전체 포스트 가져오기(페이징)
+export const getPosts = async (page) => {
+   try {
+      const response = await snsApi.get(`/post?page=${page}`)
+      return response
+   } catch (error) {
+      console.error(`API Request 오류: ${error.message}`)
+      throw error
+   }
+}

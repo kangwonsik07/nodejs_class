@@ -49,7 +49,7 @@ router.post('/', isLoggedIn, upload.single('img'), async (req, res) => {
       // 게시물 생성
       const post = await Post.create({
          content: req.body.content, // 게시물 내용
-         img: `/${req.file.filename}`, // 이미지 url(파일명) /dog124873.jpg
+         img: `${req.file.filename}`, // 이미지 url(파일명) /dog124873.jpg
          UserId: req.user.id, // 작성자 id
       })
 

@@ -17,7 +17,7 @@ module.exports = () => {
             try {
                // 이메일로 사용자 조회
                //select * from users where email = ?
-               const exUser = await User.findOne({ whrer: { email } })
+               const exUser = await User.findOne({ where: { email } })
 
                if (exUser) {
                   //이메일에 해당하는 사용자가 있는 경우

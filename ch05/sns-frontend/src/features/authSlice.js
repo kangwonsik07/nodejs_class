@@ -86,7 +86,7 @@ const authSlice = createSlice({
             state.user = action.payload
          })
          .addCase(registerUserThunk.rejected, (state, action) => {
-            state.loading = true
+            state.loading = false
             state.error = action.payload
          })
       //로그인
@@ -101,7 +101,7 @@ const authSlice = createSlice({
             state.user = action.payload
          })
          .addCase(loginUserThunk.rejected, (state, action) => {
-            state.loading = true
+            state.loading = false
             state.error = action.payload
          })
       //로그아웃
@@ -116,7 +116,7 @@ const authSlice = createSlice({
             state.user = null // 로그아웃 후 유저 정보 초기화
          })
          .addCase(logoutUserThunk.rejected, (state, action) => {
-            state.loading = true
+            state.loading = false
             state.error = action.payload
          })
       builder
@@ -130,7 +130,7 @@ const authSlice = createSlice({
             state.user = action.payload.user || null
          })
          .addCase(checkAuthStatusThunk.rejected, (state, action) => {
-            state.loading = true
+            state.loading = false
             state.isAuthenticated = false
             state.error = action.payload
             state.user = null
