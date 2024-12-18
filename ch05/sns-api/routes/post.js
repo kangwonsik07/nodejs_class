@@ -22,12 +22,14 @@ const upload = multer({
          cb(null, 'uploads/') // uploads폴더에 저장
       },
       filename(req, file, cb) {
-         const ext = path.extname(file.originalname) // 파일 확장자 추출
+         const decodedFileName = decodeURIComponent(file.originalname) //파일명 디코딩(한글 파일명 깨짐 방지)
+         const ext = path.extname(decodedFileName) //확장자 추출
+         const basename = path.basename(decodedFileName, ext) //확장자 제거한 파일명 추출
 
          // 파일명 설정: 기존이름 + 업로드 날짜시간 + 확장자
-         //  dog.jpg
-         // ex) dog + 14r7215+ .jpg
-         cb(null, path.basename(file.originalname, ext) + Date.now() + ext)
+         // dog.jpg
+         // ex) dog + 1231342432443 + .jpg
+         cb(null, basename + Date.now() + ext)
       },
    }),
 
@@ -122,7 +124,7 @@ router.put('/:id', isLoggedIn, upload.single('img'), async (req, res) => {
    try {
       // 게시물 존재 여부 확인
       // select * from post where id = ? and UserId = ?
-      const post = await Post.findOne({ where: { id: req.params.id, UserId: req.params.id } })
+      const post = await Post.findOne({ where: { id: req.params.id, UserId: req.user.id } })
       if (!post) {
          return res.status(404).json({ success: false, message: '게시물을 찾을 수 없습니다.' })
       }
@@ -145,7 +147,7 @@ router.put('/:id', isLoggedIn, upload.single('img'), async (req, res) => {
             )
          )
 
-         await post.addHashthags(result.map((r) => r[0])) // 기존해시태그를 새 해시태그로 교체
+         await post.addHashtags(result.map((r) => r[0])) // 기존해시태그를 새 해시태그로 교체
       }
       //엡데이트 된 게시물 다시 조회
       const updatePost = await Post.findOne({
