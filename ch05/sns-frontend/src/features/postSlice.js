@@ -77,6 +77,7 @@ const postSlice = createSlice({
             state.loading = false
             state.error = action.payload
          })
+      // 전체 게시물 가져오기
       builder
          .addCase(fetchPostsThunk.pending, (state) => {
             state.loading = true
@@ -91,6 +92,7 @@ const postSlice = createSlice({
             state.loading = false
             state.error = action.payload
          })
+      // 게시물 삭제
       builder
          .addCase(deletePostThunk.pending, (state) => {
             state.loading = true

@@ -147,7 +147,7 @@ router.put('/:id', isLoggedIn, upload.single('img'), async (req, res) => {
             )
          )
 
-         await post.addHashtags(result.map((r) => r[0])) // 기존해시태그를 새 해시태그로 교체
+         await post.setHashtags(result.map((r) => r[0])) // 기존해시태그를 새 해시태그로 교체
       }
       //엡데이트 된 게시물 다시 조회
       const updatePost = await Post.findOne({

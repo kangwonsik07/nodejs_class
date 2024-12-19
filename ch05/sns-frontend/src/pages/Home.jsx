@@ -31,7 +31,7 @@ const Home = ({ isAuthenticated, user }) => {
 
          {error && (
             <Typography variant="body1" align="center" color="error">
-               에러 발생:
+               에러 발생:{error}
             </Typography>
          )}
 
