@@ -1,8 +1,9 @@
 import './styles/common.css'
 import { Route, Routes } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { useEffect } from 'react'
 import { checkAuthStatusThunk } from './features/authSlice'
+import { useEffect } from 'react'
+import { Toolbar } from '@mui/material'
 
 import Navbar from './components/shared/Navbar'
 import Footer from './components/shared/Footer'
@@ -11,17 +12,17 @@ import LoginPage from './pages/LoginPage'
 import Home from './pages/Home'
 import ItemCreatePage from './pages/ItemCreatePage'
 import ItemEditPage from './pages/ItemEditPage'
+import ItemListPage from './pages/ItemListPage'
+import ItemSellDetailPage from './pages/ItemSellDetailPage'
 
 import RedirectLoginRoute from './components/auth/RedirectLoginRoute'
 import AdminRoute from './components/auth/AdminRoute'
-import ItemListPage from './pages/ItemListPage'
-import { Toolbar } from '@mui/material'
 
 function App() {
    const dispatch = useDispatch()
-   const { isAuthenticated, user } = useSelector((state) => state.auth) // 로그인 상태, 로그인 한 사용자 정보
+   const { isAuthenticated, user } = useSelector((state) => state.auth) //로그인 상태, 로그인 한 사용자 정보
 
-   // 새로고침시 redux state 데이터가 초기화 되거나 프로그램 실행 중 문제 발생 가능성이 있으므로 지속적인 로그인 상태 확인을 위해 사용
+   //새로고침시 redux state가 초기화 되거나 프로그램 실행 중 문제 발생 가능성이 있으므로 지속적인 로그인 상태 확인을 위해 사용
    useEffect(() => {
       dispatch(checkAuthStatusThunk())
    }, [dispatch])
@@ -29,11 +30,12 @@ function App() {
    return (
       <>
          <Navbar isAuthenticated={isAuthenticated} user={user} />
-         {/* 메뉴에 아래 컨텐츠가 가려져서 보이는 문제 해결 -> Appbar  높이만큼 여백추가*/}
+         {/* 메뉴에 아래 컨텐츠가 가려져서 보이는 문제 해결 -> Appbar 높이만큼 여백추가 */}
          <Toolbar />
          <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/items/detail/:id" element={<ItemSellDetailPage />} />
             <Route
                path="/login"
                element={
@@ -43,6 +45,7 @@ function App() {
                   </RedirectLoginRoute>
                }
             />
+
             {/* 상품 등록 */}
             <Route
                path="/items/create"

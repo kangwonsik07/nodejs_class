@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchItemsThunk, deleteItemThunk } from '../../features/itemSlice'
-import { formatwithComma } from '../../utils/PliceSet'
+import { formatWithComma } from '../../utils/priceSet'
 
 function ItemList() {
    const dispatch = useDispatch()
@@ -121,7 +121,7 @@ function ItemList() {
                                  {item.itemNm}
                               </Link>
                            </TableCell>
-                           <TableCell align="center">{formatwithComma(String(item.price))}</TableCell>
+                           <TableCell align="center">{formatWithComma(String(item.price))}</TableCell>
                            <TableCell align="center">{item.itemSellStatus}</TableCell>
                            <TableCell align="center">{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
                            <TableCell align="center">

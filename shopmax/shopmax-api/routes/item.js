@@ -1,11 +1,11 @@
 const express = require('express')
-const router = express.Router()
-const { isAdmin } = require('./middlewares')
-const { Item, Img } = require('../models')
 const multer = require('multer')
 const path = require('path')
 const fs = require('fs')
 const { Op } = require('sequelize')
+const { isAdmin } = require('./middlewares')
+const { Item, Img } = require('../models')
+const router = express.Router()
 
 // uploads 폴더가 없을 경우 새로 생성
 try {
@@ -37,15 +37,16 @@ const upload = multer({
    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB로 제한
 })
 
-// 상품 등록 localhost:8000/item
-// upload.array(값)의 매개변수 같은 input 태그의 name 값 사용, 만약 formData사용시 formData의 key값 사용
+// 상품등록 localhost:8000/item
+// upload.array(매개변수)의 매개변수 값은 input 태그의 name 값 사용, 만약 formData 사용시 formData의 key 값 사용
 router.post('/', isAdmin, upload.array('img'), async (req, res) => {
    try {
       // 업로드된 파일 확인
       if (!req.files) {
-         res.status(400).json({ success: false, message: '파일 업로드에 실패했습니다', error })
+         return res.status(400).json({ success: false, message: '파일 업로드에 실패했습니다.', error })
       }
 
+      //상품 insert
       const { itemNm, price, stockNumber, itemDetail, itemSellStatus } = req.body
       const item = await Item.create({
          itemNm,
@@ -56,10 +57,10 @@ router.post('/', isAdmin, upload.array('img'), async (req, res) => {
       })
 
       const images = req.files.map((file) => ({
-         oriImgName: file.originalname, // 원본 이미지명
-         imgUrl: `/${file.filename}`, // 이미지 경로
+         oriImgName: file.originalname, //원본 이미지명
+         imgUrl: `/${file.filename}`, //이미지 경로
          repImgYn: 'N', // 기본적으로 'N' 설정
-         itemId: item.id, // 생성된 상품 ID연결
+         itemId: item.id, // 생성된 상품 ID 연결
       }))
 
       // 첫 번째 이미지는 대표 이미지로 설정
@@ -76,8 +77,6 @@ router.post('/', isAdmin, upload.array('img'), async (req, res) => {
          item,
          images,
       })
-
-      // 상품 생성
    } catch (error) {
       console.error(error)
       res.status(500).json({ success: false, message: '상품 등록 중 오류가 발생했습니다.', error })
@@ -124,10 +123,10 @@ router.get('/', async (req, res) => {
 
       /*
          whereClause = {
-         itemNm: {
+         itemDetail: {
             [Op.like]: '운동화'
          },
-         {itemSellStatus: 'SELL'}
+         {itemSellStatus: 'SOLD_OUT'}
          }
       */
 
@@ -169,22 +168,106 @@ router.get('/', async (req, res) => {
 router.delete('/:id', isAdmin, async (req, res) => {
    try {
       const { id } = req.params //상품 id
-      // 상품이 존재하는지 확인
+
+      //상품이 존재하는지 확인
       const item = await Item.findByPk(id)
 
       if (!item) {
-         return res.status(404).json({ success: false, message: '상품을 찾을 수 없습니다' })
+         return res.status(404).json({ success: false, message: '상품을 찾을 수 없습니다.' })
       }
-      // 상품삭제 (연관된 이미지도 삭제됨 CASCADE설정)
+
+      // 상품 삭제 (연관된 이미지도 삭제됨 - CASCADE 설정)
       await item.destroy()
 
       res.json({
          success: true,
-         message: '상품이 성공적으로 삭제되었습니다',
+         message: '상품이 성공적으로 삭제되었습니다.',
       })
    } catch (error) {
       console.error(error)
       res.status(500).json({ success: false, message: '상품 삭제 중 오류가 발생했습니다.', error })
+   }
+})
+
+// 특정 상품 불러오기(id로 상품 조회) localhost:8000/item/:id
+router.get('/:id', async (req, res) => {
+   try {
+      const { id } = req.params
+
+      const item = await Item.findOne({
+         where: { id }, // 특정 상품 id로 상품 조회
+         include: [
+            {
+               model: Img, // 연관된 이미지 포함
+               attributes: ['id', 'oriImgName', 'imgUrl', 'repImgYn'], //특정 컬럼만 선택
+            },
+         ],
+      })
+
+      if (!item) {
+         return res.status(404).json({ success: false, message: '해당 상품을 찾을 수 없습니다.' })
+      }
+
+      res.json({
+         success: true,
+         message: '상품 조회 성공',
+         item,
+      })
+   } catch (error) {
+      console.error(error)
+      res.status(500).json({ success: false, message: '상품 조회 중 오류가 발생했습니다.', error })
+   }
+})
+
+// 상품 수정 localhost:8000/item/:id
+router.put('/:id', isAdmin, upload.array('img'), async (req, res) => {
+   try {
+      const { id } = req.params
+      const { itemNm, price, stockNumber, itemDetail, itemSellStatus } = req.body
+
+      // 상품이 존재하는지 확인
+      const item = await Item.findByPk(id)
+      if (!item) {
+         return res.status(404).json({ success: false, message: '상품을 찾을 수 없습니다.' })
+      }
+
+      await item.update({
+         itemNm,
+         price,
+         stockNumber,
+         itemDetail,
+         itemSellStatus,
+      })
+
+      // 수정할 이미지가 존재하는 경우
+      if (req.files && req.files.length > 0) {
+         // 기존 이미지 삭제
+         await Img.destroy({ where: { itemId: id } })
+
+         // 새 이미지 추가
+         const images = req.files.map((file) => ({
+            oriImgName: file.originalname, //원본 이미지명
+            imgUrl: `/${file.filename}`, //이미지 경로
+            repImgYn: 'N', // 기본적으로 'N' 설정
+            itemId: item.id, // 생성된 상품 ID 연결
+         }))
+
+         // 첫 번째 이미지는 대표 이미지로 설정
+         if (images.length > 0) {
+            images[0].repImgYn = 'Y'
+         }
+
+         // 이미지 여러개 insert
+         await Img.bulkCreate(images)
+      }
+
+      res.json({
+         success: true,
+         message: '상품과 이미지가 성공적으로 수정되었습니다.',
+      })
+   } catch (error) {
+      console.error(error)
+      res.status(500).json({ success: false, message: '상품 수정 중 오류가 발생했습니다.', error })
    }
 })
 
